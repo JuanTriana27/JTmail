@@ -1,17 +1,24 @@
 package co.jtmail.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.Instant;
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 /**
  * Entidad que representa un usuario del sistema (tipo Gmail).
  * Mapea directamente con la tabla "users" en PostgreSQL.
+ * Implementa UserDetails para integrarse con Spring Security y JWT.
  */
 @Data
 @Builder
@@ -19,7 +26,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements UserDetails {
 
     /**
      * ID único del usuario.
@@ -45,10 +52,12 @@ public class User {
     private String avatarUrl;
 
     /* Indica si el usuario está activo en el sistema */
+    @Builder.Default
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 
     /* Contador de correos no leídos */
+    @Builder.Default
     @Column(name = "unread_count")
     private Integer unreadCount = 0;
 
@@ -93,4 +102,46 @@ public class User {
     protected void onUpdate() {
         updatedAt = Instant.now();
     }
+
+    // ─── UserDetails ───────────────────────────────────────────
+    // @JsonIgnore evita que Swagger y Jackson intenten serializar
+    // estos métodos de Spring Security en las respuestas de la API
+
+    @Override
+    @JsonIgnore
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        // Por ahora todos los usuarios tienen el mismo rol
+        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+    }
+
+    /* Spring Security necesita getPassword() para verificar credenciales */
+    @Override
+    @JsonIgnore
+    public String getPassword() {
+        return passwordHash;
+    }
+
+    /* Spring Security usa el email como identificador único del usuario */
+    @Override
+    @JsonIgnore
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isAccountNonExpired() { return true; }
+
+    @Override
+    @JsonIgnore
+    public boolean isAccountNonLocked() { return true; }
+
+    @Override
+    @JsonIgnore
+    public boolean isCredentialsNonExpired() { return true; }
+
+    /* Delega en isActive para que usuarios desactivados no puedan autenticarse */
+    @Override
+    @JsonIgnore
+    public boolean isEnabled() { return isActive; }
 }

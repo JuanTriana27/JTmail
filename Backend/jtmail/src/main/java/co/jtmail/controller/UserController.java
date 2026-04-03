@@ -1,6 +1,9 @@
 package co.jtmail.controller;
 
 import co.jtmail.dto.request.CreateUserRequest;
+import co.jtmail.dto.request.UpdateEmailRequest;
+import co.jtmail.dto.request.UpdatePasswordRequest;
+import co.jtmail.dto.request.UpdateUserRequest;
 import co.jtmail.dto.response.UserResponse;
 import co.jtmail.service.UserService;
 import jakarta.validation.Valid;
@@ -36,15 +39,35 @@ public class UserController {
     }
 
     // Update tiene su propio DTO: no tiene sentido reusar CreateUserRequest
-    // porque los campos requeridos en creación no son los mismos que en edición
+    // porque los campos requeridos en creacion no son los mismos que en edición
     @PutMapping("/{id}")
     public ResponseEntity<UserResponse> updateUser(
             @PathVariable UUID id,
-            @Valid @RequestBody CreateUserRequest request
+            @Valid @RequestBody UpdateUserRequest request
     ) {
         return ResponseEntity.ok(userService.updateUser(id, request));
     }
 
+    // Actualizar email
+    @PutMapping("/{id}/email")
+    public ResponseEntity<UserResponse> updateEmail(
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateEmailRequest request
+    ) {
+        return ResponseEntity.ok(userService.updateEmail(id, request));
+    }
+
+    // Actualizar pass
+    @PutMapping("/{id}/password")
+    public ResponseEntity<Void> updatePassword(
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdatePasswordRequest request
+    ) {
+        userService.updatePassword(id, request);
+        return ResponseEntity.noContent().build(); // 204 — no hay nada útil que retornar
+    }
+
+    // ELIMINAR USER
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
         userService.deleteUser(id);

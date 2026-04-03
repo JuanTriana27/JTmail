@@ -12,7 +12,9 @@ public class UserMapper {
                 .email(request.getEmail())
                 .fullName(request.getFullName())
                 .avatarUrl(request.getAvatarUrl())
-                // Password se maneja en el service (hash)
+                // el service hashea password antes de guardar
+                .isActive(true)
+                .unreadCount(0)
                 .build();
     }
 
