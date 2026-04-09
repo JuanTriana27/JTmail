@@ -18,6 +18,7 @@ public class EmailResponse {
     private UUID threadId;
     private UUID senderId;
     private String senderName;
+    private String senderEmail;
     private String subject;
     private String body;
     private EmailStatus status;

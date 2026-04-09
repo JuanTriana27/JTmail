@@ -13,6 +13,7 @@ public class EmailMapper {
                 .threadId(email.getThread().getIdThread())
                 .senderId(email.getSender().getIdUser())
                 .senderName(email.getSender().getFullName())
+                .senderEmail(email.getSender().getEmail())
                 .subject(email.getSubject())
                 .body(email.getBody())
                 .status(email.getStatus())

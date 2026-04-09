@@ -14,6 +14,10 @@ public interface EmailService {
 
     //
     List<InboxItemResponse> getInbox(UUID userId);
+
+    // Obtener emails enviados
+    List<EmailResponse> getSentEmails(UUID userId);
+
     List<InboxItemResponse> getStarred(UUID userId);
     List<InboxItemResponse> getTrash(UUID userId);
     List<EmailResponse> getDrafts(UUID userId);

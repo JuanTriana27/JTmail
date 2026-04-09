@@ -87,4 +87,10 @@ public class EmailController {
         emailService.deleteEmail(emailId);
         return ResponseEntity.noContent().build();
     }
+
+    // Obtener emails enviados
+    @GetMapping("/sent/{userId}")
+    public ResponseEntity<List<EmailResponse>> getSentEmails(@PathVariable UUID userId) {
+        return ResponseEntity.ok(emailService.getSentEmails(userId));
+    }
 }

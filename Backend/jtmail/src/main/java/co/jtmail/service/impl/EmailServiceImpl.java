@@ -29,6 +29,7 @@ public class EmailServiceImpl implements EmailService {
     private final UserRepository userRepository;
     private final ThreadRepository threadRepository;
 
+    // Enviar email
     @Override
     public EmailResponse sendEmail(UUID senderId, SendEmailRequest request) {
         User sender = userRepository.findById(senderId)
@@ -56,6 +57,7 @@ public class EmailServiceImpl implements EmailService {
         return EmailMapper.toResponse(email);
     }
 
+    // listar inbox
     @Override
     @Transactional(readOnly = true)
     public List<InboxItemResponse> getInbox(UUID userId) {
@@ -69,6 +71,7 @@ public class EmailServiceImpl implements EmailService {
                 .toList();
     }
 
+    // leido
     @Override
     @Transactional(readOnly = true)
     public List<InboxItemResponse> getStarred(UUID userId) {
@@ -81,6 +84,7 @@ public class EmailServiceImpl implements EmailService {
                 .toList();
     }
 
+    // papelera
     @Override
     @Transactional(readOnly = true)
     public List<InboxItemResponse> getTrash(UUID userId) {
@@ -93,6 +97,7 @@ public class EmailServiceImpl implements EmailService {
                 .toList();
     }
 
+    // obtener draft
     @Override
     @Transactional(readOnly = true)
     public List<EmailResponse> getDrafts(UUID userId) {
@@ -103,6 +108,7 @@ public class EmailServiceImpl implements EmailService {
                 .toList();
     }
 
+    // obtener email por id
     @Override
     @Transactional(readOnly = true)
     public EmailResponse getEmailById(UUID emailId) {
@@ -111,6 +117,7 @@ public class EmailServiceImpl implements EmailService {
         return EmailMapper.toResponse(email);
     }
 
+    // marcar leido
     @Override
     public void markAsRead(UUID recipientId) {
         EmailRecipient recipient = recipientRepository.findById(recipientId)
@@ -121,6 +128,7 @@ public class EmailServiceImpl implements EmailService {
         recipientRepository.save(recipient);
     }
 
+    // marcar destacado
     @Override
     public void toggleStar(UUID recipientId) {
         EmailRecipient recipient = recipientRepository.findById(recipientId)
@@ -131,6 +139,7 @@ public class EmailServiceImpl implements EmailService {
         recipientRepository.save(recipient);
     }
 
+    // mover a papelera
     @Override
     public void moveToTrash(UUID recipientId) {
         EmailRecipient recipient = recipientRepository.findById(recipientId)
@@ -140,12 +149,27 @@ public class EmailServiceImpl implements EmailService {
         recipientRepository.save(recipient);
     }
 
+    // eliminar email
     @Override
     public void deleteEmail(UUID emailId) {
         if (!emailRepository.existsById(emailId)) {
             throw new ResourceNotFoundException("Email", emailId);
         }
         emailRepository.deleteById(emailId);
+    }
+
+    // emails enviados
+    @Override
+    @Transactional(readOnly = true)
+    public List<EmailResponse> getSentEmails(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        // Correos donde el usuario es el remitente y ya fueron enviados
+        return emailRepository.findBySenderAndStatus(user, EmailStatus.SENT)
+                .stream()
+                .map(EmailMapper::toResponse)
+                .toList();
     }
 
     // ─── helpers ──────────────────────────────────────────────
